@@ -10,7 +10,7 @@ class Table:
         self.line_width = 10
         self.table_width = 1000
         self.table_height = 500
-        self.aim = [[200,200], (0.001)] # pos , angle
+        self.aim = [[200,200], 0] # pos , angle
 
 
 
@@ -19,29 +19,29 @@ class Table:
         self.top_right = (self.center_x + self.table_width// 2, self.center_y - self.table_height// 2)
         self.bottom_left = (self.center_x - self.table_width// 2, self.center_y + self.table_height//2)
         self.bottom_right = (self.center_x + self.table_width// 2, self.center_y + self.table_height// 2)
-
-        pygame.draw.line(screen, GREEN, self.top_left, self.top_right, self.line_width)
+        pygame.draw.line(self.screen, GREEN, self.top_left, self.top_right, self.line_width)
         # Reta Inferior
-        pygame.draw.line(screen, GREEN, self.bottom_left, self.bottom_right, self.line_width)
+        pygame.draw.line(self.screen, GREEN, self.bottom_left, self.bottom_right, self.line_width)
         # Reta Esquerda
-        pygame.draw.line(screen, GREEN, self.top_left, self.bottom_left, self.line_width)
+        pygame.draw.line(self.screen, GREEN, self.top_left, self.bottom_left, self.line_width)
         # Reta Direita
-        pygame.draw.line(screen, GREEN, self.top_right, self.bottom_right, self.line_width)
-        #print(self.top_left, self.top_right, self.bottom_left, self.bottom_right)
+        pygame.draw.line(self.screen, GREEN, self.top_right, self.bottom_right, self.line_width)
+
+        print(self.aim)
 
     def change_angle(self, click_pos, new_pos):
         if len(click_pos) > 0:
             delta_y = (click_pos[1] - new_pos[1])
             delta_x = (click_pos[0] - new_pos[0])
-            angle = math.atan2(delta_y, delta_x)
-            self.aim[1] = angle
+            angle = 0.00005 * delta_y
+            self.aim[1] += angle
+
 
 
     
-    def draw_aim(self): # projecao do ponto
-        pygame.draw.circle(self.screen, BLACK, (self.aim[0]), 10, 10)
+    def draw_aim(self, origin_point, angle , count): # projecao do ponto
+        pygame.draw.circle(self.screen, BLACK, (origin_point), 10, 10)
         # parametrizacao do ponto inicial (self.aim[0])
-        angle = self.aim[1] 
         # caso de intersecao bordas verticais 
         # 140 = self.aim[0][0] + t * cos(self.aim[1])
         direction_vector = pygame.Vector2(math.cos(angle), math.sin(angle))
@@ -52,39 +52,53 @@ class Table:
         p3 = self.top_left[1] # 110
         p4 = self.bottom_right[1] # 610
         if direction_vector.x != 0:
-            t1 = (p1 - self.aim[0][0]) / math.cos(angle) # x dentro do limite
-            t2 = (p2 - self.aim[0][0]) / math.cos(angle) # x dentro do limite 
+            t1 = (p1 - origin_point[0]) / math.cos(angle) # x dentro do limite
+            t2 = (p2 - origin_point[0]) / math.cos(angle) # x dentro do limite 
         if direction_vector.y != 0:
-            t3 = (p3 - self.aim[0][1])/ math.sin(angle)
-            t4 = (p4 - self.aim[0][1])/ math.sin(angle)
+            t3 = (p3 - origin_point[1])/ math.sin(angle)
+            t4 = (p4 - origin_point[1])/ math.sin(angle)
         
-        origin_points = [p1, p2, p3, p4]
-        print(origin_points)
+        table_points  = [p1, p2, p3, p4]
  
         T = [t1, t2, t3, t4]
-      
-        point = []
+        # gather valid intersection candidates (t, point)
+        candidates = []
+        left_x, right_x, top_y, bottom_y = p1, p2, p3, p4
         for i, t in enumerate(T):
-            if t < 0:
+            # consider only forward intersections
+            if not (t > 0 and t != float('inf')):
                 continue
-            elif i == 0 or i == 1:
-                py = self.aim[0][1] + t * math.sin(angle)
-                px = origin_points[i]
-                print(py)
-                if  110 <= py <= 610:
-                    point = [px, py]
-            elif i == 2 or i == 3:
-                px = self.aim[0][0] + t * math.cos(angle)
-                py = origin_points[i]
-                if 140 <= px <= 1140 :
-                    point = [px, py]
- 
+            if i == 0 or i == 1:
+                px = table_points[i]
+                py = origin_point[1] + t * math.sin(angle)
+                if top_y <= py <= bottom_y:
+                    candidates.append((t, [px, py]))
+            else:
+                py = table_points[i]
+                px = origin_point[0] + t * math.cos(angle)
+                if left_x <= px <= right_x:
+                    candidates.append((t, [px, py]))
 
-        print(point) 
-       
+        point = None
+        if candidates:
+            
+            candidates.sort(key=lambda x: x[0])
+            point = candidates[0][1] # ponto masi proximo de intersecao
 
+        if point is not None:
+            pygame.draw.line(self.screen,(0,0,0) ,origin_point, point, 3)
+            if count < 5:
+                count += 1
+                
+                aim_direction = pygame.Vector2(math.cos(angle), math.sin(angle))
+                if abs(point[0] - left_x) < 1e-6 or abs(point[0] - right_x) < 1e-6:
+                    aim_direction.x *= -1
+                if abs(point[1] - top_y) < 1e-6 or abs(point[1] - bottom_y) < 1e-6:
+                    aim_direction.y *= -1
 
-        pygame.draw.line(self.screen,(0,0,0) ,self.aim[0], point, 3)
+                reflected_angle = math.atan2(aim_direction.y, aim_direction.x)
+                self.draw_aim(point, reflected_angle, count)
+
 
 
             
@@ -134,7 +148,7 @@ while run:
     
     # render game   
     table.draw_table()
-    table.draw_aim()
+    table.draw_aim(table.aim[0], table.aim[1], 0)
     table.change_angle(click_pos, [mouse_x, mouse_y])
     pygame.display.flip()
     clock.tick(60)
