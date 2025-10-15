@@ -1,3 +1,4 @@
-[ ] - pool table
-[ ] - reflection aim
-[ ] - 
+[X] - pool table
+[X] - reflection aim
+[ ] - balls
+[ ] - physics 
