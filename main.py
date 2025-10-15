@@ -27,7 +27,7 @@ class Table:
         # Reta Direita
         pygame.draw.line(self.screen, GREEN, self.top_right, self.bottom_right, self.line_width)
 
-        print(self.aim)
+
 
     def change_angle(self, click_pos, new_pos):
         if len(click_pos) > 0:
@@ -128,6 +128,7 @@ click_pos= []
 
 
 table = Table(screen)
+mouse_x , mouse_y = 0, 0
 
 run = True
 
@@ -138,18 +139,22 @@ while run:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 click_pos = event.pos
-                print(f"cliclado em {click_pos}")
+        
         if event.type == pygame.MOUSEBUTTONUP:
             click_pos = []
 
     screen.fill(WHITE)
 
-    mouse_x, mouse_y = pygame.mouse.get_pos()
+    new_mouse_x, new_mouse_y = pygame.mouse.get_pos()
+    if new_mouse_x != mouse_x or new_mouse_y != mouse_y:
+           table.change_angle(click_pos, [mouse_x, mouse_y])
+           mouse_x , mouse_y = new_mouse_x, new_mouse_y
+
     
     # render game   
     table.draw_table()
     table.draw_aim(table.aim[0], table.aim[1], 0)
-    table.change_angle(click_pos, [mouse_x, mouse_y])
+ 
     pygame.display.flip()
     clock.tick(60)
 
