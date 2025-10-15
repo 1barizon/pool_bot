@@ -44,49 +44,51 @@ class Table:
         angle = self.aim[1] 
         # caso de intersecao bordas verticais 
         # 140 = self.aim[0][0] + t * cos(self.aim[1])
-
+        direction_vector = pygame.Vector2(math.cos(angle), math.sin(angle))
+        t1, t2, t3, t4 = float("inf") , float("inf"), float("inf"), float("inf") 
+       
         p1 = self.top_left[0] # 140
-        t1 = (p1 - self.aim[0][0]) / math.cos(angle) # x dentro do limite
-
-
         p2 = self.top_right[0] # 1140
-        t2 = (p2 - self.aim[0][0]) / math.cos(angle) # x dentro do limite 
-
         p3 = self.top_left[1] # 110
-        t3 = (p3 - self.aim[0][1])/ math.sin(angle)
-
         p4 = self.bottom_right[1] # 610
-        t4 = (p4 - self.aim[0][1])/ math.sin(angle)
+        if direction_vector.x != 0:
+            t1 = (p1 - self.aim[0][0]) / math.cos(angle) # x dentro do limite
+            t2 = (p2 - self.aim[0][0]) / math.cos(angle) # x dentro do limite 
+        if direction_vector.y != 0:
+            t3 = (p3 - self.aim[0][1])/ math.sin(angle)
+            t4 = (p4 - self.aim[0][1])/ math.sin(angle)
         
-        origin_points = [p1, p2, p3, p4 ]
+        origin_points = [p1, p2, p3, p4]
+        print(origin_points)
+ 
         T = [t1, t2, t3, t4]
+      
         point = []
-        for t in T:
+        for i, t in enumerate(T):
             if t < 0:
-                pass
-            elif T.index(t) == 0 or T.index(t) == 1:
-                py = self.aim[0][1] + t * math.sin(angle) # se 110 < y < 610
-                px = origin_points[T.index(t)]
-                if py < 110 or py > 610:
-                    pass
-                else:
-                    point=[px, py]
-            elif T.index(t) == 2 or T.index(t) == 3:
-                px = self.aim[0][0] + t * math.cos(angle) # se 110 < y < 610
-                py = origin_points[T.index(t)]
-                if px < 110 or px > 610:
-                    pass
-                else:
-                    point=[px, py]
+                continue
+            elif i == 0 or i == 1:
+                py = self.aim[0][1] + t * math.sin(angle)
+                px = origin_points[i]
+                print(py)
+                if  110 <= py <= 610:
+                    point = [px, py]
+            elif i == 2 or i == 3:
+                px = self.aim[0][0] + t * math.cos(angle)
+                py = origin_points[i]
+                if 140 <= px <= 1140 :
+                    point = [px, py]
  
 
         print(point) 
+       
 
 
         pygame.draw.line(self.screen,(0,0,0) ,self.aim[0], point, 3)
 
 
             
+
 
 
 
