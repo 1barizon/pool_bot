@@ -1,6 +1,22 @@
 import pygame
 import math
 
+
+
+
+class Ball:
+    def __init__(self, pos : pygame.Vector2, color : str):
+        self.pos = pos
+        self.color = color
+        self.vel = 0
+        
+
+
+
+
+
+
+
 class Table:
     def __init__(self, screen):
         self.screen = screen
