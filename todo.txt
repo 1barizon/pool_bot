@@ -1,4 +1,8 @@
 [X] - pool table
 [X] - reflection aim
-[ ] - balls
+[ ] - balls 
+- sempre mover tentar "mover" e so alterar a velocidade delas ?
+- tratar a velocidade de forma separa ? 
+- cada uma tem uma direção especifica 
+- 
 [ ] - physics 

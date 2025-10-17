@@ -5,11 +5,26 @@ import math
 
 
 class Ball:
-    def __init__(self, pos : pygame.Vector2, color : str):
+    def __init__(self, pos : pygame.Vector2, color, radius: int):
         self.pos = pos
         self.color = color
-        self.vel = 0
-        
+        self.radius = radius
+        self.vel = pygame.Vector2((0,0))
+
+    def render_ball(self, screen):
+        pygame.draw.circle(screen, self.color, self.pos,self.radius) 
+
+    def move(self): 
+        # so pode mover se estiver dentro do limite da mesa 
+        self.pos.x += self.vel.x
+        self.pos.y+= self.vel.y
+        # sempre diminuindo a velocidade
+        if self.vel.x > 0:
+            self.vel.x -= 1
+        if self.vel.y > 0:
+            self.vel.y -= 1
+
+
 
 
 
@@ -142,9 +157,10 @@ BLACK = (0, 0, 0)
 # mouse 
 click_pos= []
 
-
+# game variable
 table = Table(screen)
 mouse_x , mouse_y = 0, 0
+ball0 = Ball(pygame.Vector2(250,250), GREEN,10)
 
 run = True
 
@@ -155,6 +171,7 @@ while run:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 click_pos = event.pos
+                ball0.vel = pygame.Vector2((10, 10))
         
         if event.type == pygame.MOUSEBUTTONUP:
             click_pos = []
@@ -170,6 +187,8 @@ while run:
     # render game   
     table.draw_table()
     table.draw_aim(table.aim[0], table.aim[1], 0)
+    ball0.render_ball(screen)
+    ball0.move()
  
     pygame.display.flip()
     clock.tick(60)
